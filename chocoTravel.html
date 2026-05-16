@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <h1>ちょこ旅</h1>
+    
+    <h2>概要</h2>
+
+    <p>企画開発部、2026年春みんげーチーム開発で開発したゲームです。</p>
+    <p>マリオやカービィのような3dモデルを用いながらも2次元の操作でステージを進めていく2Dアクションゲームです。
+    主人公のチョコレートは液体状になったり、他のお菓子をコーティングして能力を得たりと「チョコレート」であることを活かしてステージを進めていきます。
+    </p>
+    <p>ゲームにきちんとしたチュートリアルは存在せず、マリオの1-1のようにプレイヤーに試行錯誤してもらい"気づいてもらう"設計を心がけています。</p>
+    <p>2026年5月 現在、このプロジェクトは進行中であり、ストーリーや新ステージの追加、機能の改善などをしていくつもりです。</p>
+    <h4>デモプレイ映像(Stage1)</h4>
+    <iframe
+    class="youtube-video"
+    src="https://www.youtube.com/embed/bj4w3zvyGMU"
+    title="Gameplay Video"
+    allowfullscreen>
+    </iframe>
+
+    <h2>使用技術</h2>
+    <p>C# / Unity / MVC設計 / DI設計 / UniRx etc...</p>
+
+    <h2>担当内容</h2>
+    <p>プログラマーとしてプロジェクトに参加。</p>
+    <p>大きく担当したのはタイトルシーンの基盤設計。</p>
+    <p>その後は以下のような部分を点々と実装しました</p>
+    <ul>
+        <li>ダメージエリア(マグマ)の実装</li>
+        <li>ユーザーデータの管理(ScriptableObject)</li>
+        <li>フォントの差し替え</li>
+        <li>プレイヤー(チョコ)が歩いた時に擬音を出す(文字)</li>
+        <li>Stage3の敵配置</li>
+        <li>敵を生成する"スポナー"を各敵ごとにPrefab化</li>
+        <li>能力でアーモンドを投射する時の矢印のデザイン</li>
+        <li>敵が投げるキャンディーのモデリング</li>
+        <li>能力で出す"バリア"エフェクトの作成</li>
+    </ul>
+
+    <h2>工夫した内容</h2>
+    <p>タイトルの基盤を作る際に一番意識したのはMVC設計を踏襲しつつかつ"後から変更しやすくすること"です。</p>
+    <p>そこで次の流れに沿ってタイトルSceneを作成しました。</p>
+
+    <h4>問題提起</h4>
+
+        <ul>
+            タイトルのボタンの機能をInspector上でOnclic設定するのは不親切ではないか。
+            また、Sceneに変更を加えた時に参照切れや設定漏れが起きやすく保守性に欠けるのではないか。
+        </ul>
+
+    <h4>解決法</h4>
+        <p>MVC設計をもとに以下のように責務を分離する</p>
+        <ul>
+            <li>View: ボタンイベントの登録</li>
+            <li>Controller: 押した時のロジックを実装</li>
+        </ul>
+
+    <h4>実装したコード</h4>
+
+    <h4>ViewのScriptの一部</h4>
+    <div>
+    <pre><code>
+    //関数を登録する関数
+    public void BindStart(Action action)
+        => _startButton.onClick.AddListener(() => action());
+    </code></pre>
+    </div>
+
+    <h4>ControllerのScriptの一部</h4>
+    <div>
+    <pre><code>
+    _titleUIView.BindStart(OnClickStartButton); //これをAwake()で実行する
+
+    private void OnClickStartButton() //登録する関数
+    {
+        if (_hasStartedTransition) return;
+
+        if (_isStarting)
+        {
+            OnWakeUpCompleted();
+            return;
+        }
+
+        _isStarting = true;
+        _titleUIView.SetMainMenuInteractable(start: true, settings: false, quit: false);
+        _titleUIView.SelectStartButton();
+
+        if (_animationController == null || !_animationController.SetWakeUp())
+        {
+            OnWakeUpCompleted();
+        }
+    }
+    </code></pre>
+    </div>
+
+    <h4>結果</h4>
+    <p>実際にこの設計によって以下のメリットを得られました。</p>
+    <lu>
+        <li>新たにボタンを追加する際に、コピペできるようにすることで変更が容易になった。</li>
+        <li>新たにボタンを押した時の処理を実装(変更)することが容易になった。</li>
+        <li>Sceneの変更による設定漏れなどの人為的ミスを防止できた</li>
+    </lu>
+
+    <p>
+        以降の他の実装も基盤を作る際には"変更のしやすさ、見やすさ、使いやすさ"を念頭に実装を行いました。
+    </p>
+
+    <h2>苦労した点</h2>
+    <p>
+        一番苦労したのは"他人のコードを読むこと"です。
+    </p>
+    <p>
+        他メンバーがゲーム内のエンティティをモジュール化して実装しており、簡単に敵などを実装できるようになっていました。それ自体はとてもありがたくチームの生産性を
+        向上させていたと思います。
+    </p>
+    <p>
+        実際に20個以上のファイルで構成されていますが、少し機能を追加するだけなら数ファイルだけ理解すればいいという素晴らしい構成でした。
+    </p>
+    <p>
+        一方で、バグ修正や大規模な変更となれば話は別です。20個以上のファイルの大部分を理解する必要があります。そしてその仕様を深く理解しているのは作ったメンバーのみでした。
+    </p>
+    <p>
+        この経験を通して、チーム開発では機能を実装する力だけでなく、誰が見ても理解しやすいコードや設計を残すことが、長期的な開発では非常に重要だと実感しました。
+    </p>
+
+    <h2>得た技術</h2>
+    <p>今回このプロジェクトに参加したことで、知識として知っていた「DI設計」や「コンポーネント指向」を実際に使用することによって”生きた技術”として吸収することができました。</p>
+    <p>また、MVC設計についても使用したことにより、更に練度が上がったと感じています。</p>
+    <p>そしてなにより、大量の他の人のコードを読んだ経験は自分では思いつかない設計思想に触れる貴重な経験であり、自身の総合的なスキルアップに大きく貢献してくれたと思います。</p>
+
+    <h2>今後の展望</h2>
+    <p>今回のチーム開発を通して機能を実装するだけでなく、チームとして長く開発できるような設計の大切さを学びました。</p>
+    <p>今後はUnityやC#の技術力を高めながら、設計/保守性のことも考えられるエンジニアを目指したいです。</p>
+    <p>また、今後も本作品の開発は続きますのでより良い完成形を目指して日々努力していきたいです。</p>
+
+    <h2></h2>
+    <div>
+    <a href="index.html">← トップページへ戻る</a>
+    </div>
+
+
+</body>
+</html>

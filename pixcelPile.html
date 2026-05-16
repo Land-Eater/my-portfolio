@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <h1>PixcelPile</h1>
+    <h4>※こちらは企画開発部がSteamで公開したPixcelPileのプロトタイプです。Steamで公開した方の開発には参加していません</h4>
+    
+    <h2>概要</h2>
+
+    <p>企画開発部、2025年春みんげーチーム開発で開発したゲームです。</p>
+    <p>
+        テトリスのような見た目ですが特徴的なのは"形を作る"ことで相手に攻撃を行う点です。
+    </p>
+    <p>
+        ブロックには4色の色があり、同じ色で星型や数字の1の形などを作ることで相手に攻撃します。消す色によっても効果が異なり、青色なら相手に妨害、緑色なら自分のHPを回復します。
+    </p>
+    <p>ブロックを消しあって先に相手のHPを削り切った方の勝利となります。</p>
+    
+
+    <h4>サークルの公式サイトからコミックマーケットで頒布したものがダウンロードできます。</h4>
+    <p>こちらの作品が収録されているのは2025 Summerになります</p>
+    <a href="https://panddclub.org" target="_blank">公式サイトはこちら</a>
+
+    <h2>使用技術</h2>
+    <p>C++ / Siv3D</p>
+
+    <h2>担当内容</h2>
+    <p>"一応"プログラマーとして初めてUnityのプロジェクトに参加。</p>
+    <p>本当の初心者でオブジェクト指向すら知らない状態で参加しました。めちゃくちゃ大変だったのを覚えています。後に大学の授業でオブジェクト指向をやった時とても感動しました。</p>
+
+    <p>主に担当したのはブロックの落下処理です。それ以外も多少触れましたが当時初心者すぎて何を担当したか覚えていません。</p>
+
+    <h2>工夫した内容</h2>
+    <p>
+        ブロックの落下処理を行う際に、総当たりで処理していると処理時間が長くなってしまうので"ダイナミックプログラミング"を使用して計算量を減らそうとした。
+    </p>
+
+    <h4>問題提起</h4>
+
+        <ul>
+            ブロック(群)が独立して浮いているかを全ブロック総当たりして判断すると計算量が多くなってしまう。
+        </ul>
+
+    <h4>解決法</h4>
+        <p>以下の図のように設計し、訪れたブロックをbool型配列で保存し時間を短縮しようと試みた。</p>
+        <img src="images/PixcelPilleGraph.png" alt="図" class="img1">
+
+    <h4>実装したコードの一部</h4>
+
+    <h4>浮いているか判断するスクリプトの一部</h4>
+    <div>
+    <pre><code>
+    bool BaseGame::isfloat(int32 i, int32 j,Grid<bool>& visited) {//area[i][j]
+		if (i == area.height() - 1) {
+			return false;
+		}
+
+		visited[i][j] = true;
+
+		if ((i < area.height() - 1) && (area[i + 1][j] != nullptr)) {
+			if (visited[i + 1][j] != true) {
+				return isfloat(i + 1, j, visited);
+			}
+			
+		}
+
+		if ((j > 0) && (area[i][j - 1] != nullptr)) {
+			if (visited[i][j - 1] != true) {
+				return isfloat(i, j - 1, visited);
+			}
+		}
+
+		if ((j < area.width() - 1) && (area[i][j + 1] != nullptr)) {
+			if (visited[i][j + 1] != true) {
+				return isfloat(i, j + 1, visited);
+			}
+		}
+
+		return true;
+	}
+    </code></pre>
+    </div>
+
+
+    <h4>結果</h4>
+    <p>実際にこの設計によって以下のメリットを得られました。</p>
+    <ul>
+        <li>実際に計算量が減り、処理が軽くなった。</li>
+        <li>浮いているか判断する関数と落とす関数を別にしたことで落とすロジック(ブロックの落ちる条件)の変更を容易にした。</li>
+    </ul>
+
+
+    <h2>苦労した点</h2>
+    <p>あらゆるすべてに苦労しました。クラスという概念すら知らずに挑んだので大変でした。</p>
+
+    <h2>得た技術</h2>
+    <p>技術として得られたことは私が未熟だったこともあり、ほとんど得られませんでした。</p>
+    <p>しかし、ゲームを作るという経験。「自分の書いたコード」が動いているのを見たことで"楽しい"と感じました。</p>
+    <p>この経験が私を"ゲーム"という分野に引き込みました。</p>
+
+    <h2></h2>
+    <div>
+    <a href="index.html">← トップページへ戻る</a>
+    </div>
+
+
+</body>
+</html>
