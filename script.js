@@ -1,3 +1,4 @@
+console.log("script.js loaded");
 function getExperience(startDate)
 {
     const start = new Date(startDate);
